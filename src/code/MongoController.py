@@ -13,10 +13,9 @@ def connection_messages():
 	collection = db.Messages
 	return collection
 
-def insert_new_ticket(idTiquet, missatge, missatge_NET, idioma, equipResolutor, producte, assumpte,
+def insert_new_ticket(idTiquet, missatge, equipResolutor, producte, assumpte,
 			serveiTipus, subservei):
 	client = MongoClient('mongodb://localhost:27017/ticketsdb')
 	db = client.ticketsdb
-	db.Messages.insert({ "Id": idTiquet, "missatge": missatge, "missatge net": missatge_NET, "idiomaDescripcio": idioma,
-			"equipResolutor": equipResolutor, "producte": producte,
+	db.Messages.insert({ "Id": idTiquet, "missatge": missatge, "equipResolutor": equipResolutor, "producte": producte,
 			"assumpte": assumpte, "serveiTipus": serveiTipus, "subservei": subservei})

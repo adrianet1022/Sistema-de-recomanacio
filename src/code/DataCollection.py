@@ -3,18 +3,32 @@ import html
 
 import MongoController as mongoController
 import MessageCleaner as messageCleaner
+from bs4 import BeautifulSoup
 
 
-def cleanhtml(raw_html):
-	cleantext = html.unescape(raw_html) #treure els codis html i deixar els accents
+
+def text_cleaner(raw_html):
+	cleantext = BeautifulSoup(raw_html,"html.parser").text
 	cleantext = cleantext.lower()
 	cleantext = messageCleaner.elimina_tildes(cleantext)
-	cleanr = re.compile('<.*?>')
-	cleantext = re.sub(cleanr, '', cleantext)
 	cleantext = messageCleaner.elimina_caracteres(cleantext)
-	idioma = messageCleaner.idioma_detect(cleantext)
-	cleantext = messageCleaner.stop_words(cleantext, idioma)
-	cleantext = " ".join(cleantext.split())
+	cleantext = messageCleaner.elimina_letras_sueltas(cleantext)
+	cleantext = messageCleaner.elimina_webs(cleantext)
+	#idioma = messageCleaner.idioma_detect(cleantext)
+	cleantext = messageCleaner.stop_words(cleantext)
+	#cleantext = " ".join(cleantext.split())
+	return cleantext
+
+def query_cleaner(raw_html):
+	cleantext = BeautifulSoup(raw_html,"html.parser").text
+	cleantext = cleantext.lower()
+	cleantext = messageCleaner.elimina_tildes(cleantext)
+	cleantext = messageCleaner.elimina_caracteres(cleantext)
+	cleantext = messageCleaner.elimina_letras_sueltas(cleantext)
+	cleantext = messageCleaner.elimina_webs(cleantext)
+	#idioma = messageCleaner.idioma_detect(cleantext)
+	cleantext = messageCleaner.stop_words(cleantext)
+	#cleantext = " ".join(cleantext.split())
 	return cleantext
 
 def take_data(collection):
@@ -28,16 +42,16 @@ def take_data(collection):
 		serveiTipus = ticket.get("serveiTipus")
 		subservei = ticket.get("subservei")
 
-		missatge = cleanhtml(missatge)
-		idioma = messageCleaner.idioma_detect(missatge)
-		#missatge_NET = messageCleaner.stop_words(missatge, idioma)
+		missatge = text_cleaner(missatge)
 
-		mongoController.insert_new_ticket(idTiquet, missatge, missatge_NET, idioma, equipResolutor, producte, assumpte,
+		mongoController.insert_new_ticket(idTiquet, missatge, equipResolutor, producte, assumpte,
 			serveiTipus, subservei)
 
+#def take_ticket(ticket):
+	#pasem un ticket
 
 def run():
 	collection = mongoController.connection_tickets()
 	take_data(collection)
-	print ("Ha guardat be")
+	return ("Ha guardat be")
 

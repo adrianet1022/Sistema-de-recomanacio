@@ -33,22 +33,21 @@ def _cosine_sim(vecA, vecB):
 	   return csim
 
 #model, source_doc = query, target_docs = missatges anteriors
-def extract_context(model, source_doc, target_docs, threshold=0.5):
+def extract_context(model, source_doc, target_docs, threshold=0.7):
 		"""Calculates & returns similarity scores between given source document & all
 		the target documents."""
 		#source_doc: query
 		#target_docs: tots els documents
-		if isinstance(target_docs, str):
-			target_docs = [target_docs]
 		source_vec = vectorize(model, source_doc)
 		results = []
 		for doc in target_docs:
 			equip_resolutor = doc[1]
-			equip_resolutor = datacollection.cleanhtml(equip_resolutor)
-			#producte = doc[2]
-			#assumpte = doc[3]
-			#serveiTipus = doc[4]
-			#subservei = doc[5]
+			#equip_resolutor = datacollection.cleanhtml(equip_resolutor)
+			producte = doc[2]
+			assumpte = doc[3]
+			serveiTipus = doc[4]
+			subservei = doc[5]
+			_id = doc[6]
 			#print("DOC NO SPLIT: " + str(doc))
 			docAux = doc[0].split(" ")
 			#print("DOC SPLIT: " + str(docAux))
@@ -58,14 +57,15 @@ def extract_context(model, source_doc, target_docs, threshold=0.5):
 			if sim_score >= threshold:
 				results.append({
 					'Similitud': str(sim_score),
-					'Document': doc[0],
+					'Document': doc,
 					'Equip resolutor': str(equip_resolutor),
-					#'Producte': str(producte),
-					#'Assumpte': str(assumpte),
-					#'Servei Tipus': str(serveiTipus),
-					#'Subservei': str(subservei)
+					'Producte': str(producte),
+					'Assumpte': str(assumpte),
+					'Servei Tipus': str(serveiTipus),
+					'Subservei': str(subservei),
+					'ID': str(_id)
 				})
-		# Sort results by score in desc order
+		#Sort results by score in desc order
 		for i in range (0, len(results)):
 			results[i]['Similitud'] = float(results[i]['Similitud'])
 		results.sort(key=lambda k: k['Similitud'], reverse=True)
@@ -75,33 +75,38 @@ def extract_context(model, source_doc, target_docs, threshold=0.5):
 
 def run(query):
 	collection = mongoController.connection_messages()
-	idioma_query = messageCleaner.idioma_detect(query)
-	#cursor = collection.find({"idiomaDescripcio": idioma_query})
+	query = "no funciona el enlace para colgar practicas en atenea"
 	cursor = collection.find()
-	query = datacollection.cleanhtml(query)
-	#query = query.split(" ")
-	sentence = []
+	print("Query" + str(query))
+	query = datacollection.query_cleaner(query)
+	query = query.split(" ")
+	print("Query" + str(query))
+
+	ticket_complete = []
 	for ticket in cursor:
 		ticket_n = []
 		ticket_n.append(ticket.get("missatge"))
 		ticket_n.append(ticket.get("equipResolutor"))
-		#ticket_n.append(ticket.get("producte"))
-		#ticket_n.append(ticket.get("assumpte"))
-		#ticket_n.append(ticket.get("serveiTipus"))
-		#ticket_n.append(ticket.get("subservei"))
-		sentence += [ticket_n]
+		ticket_n.append(ticket.get("producte"))
+		ticket_n.append(ticket.get("assumpte"))
+		ticket_n.append(ticket.get("serveiTipus"))
+		ticket_n.append(ticket.get("subservei"))
+		ticket_n.append(ticket.get("Id"))
+		ticket_complete += [ticket_n]
+
 	sentences = []
-	for i in range(0, len(sentence)):
-		sentenceAux = sentence[i][0].split(" ")
+	for i in range(0, len(ticket_complete)):
+		sentenceAux = ticket_complete[i][0].split(" ") 
 		sentences += [sentenceAux]
-	model = models.Word2Vec(sentences, min_count=1)
-	#print("MODELS: " + str(model))
-	result = extract_context(model, query, sentence)
-	
+
+	model = models.Word2Vec(sentences, min_count=10)
+
+	result = extract_context(model, query, ticket_complete)
 	if len(result) < 1:
 		return ("No hi ha cap similitud")
 	else: 
-		return result[0] #result de 0 perque nomes volem tornar el int no la llista
+		return (result[0], result[1], result[2], result[3])
+
 
 
 
