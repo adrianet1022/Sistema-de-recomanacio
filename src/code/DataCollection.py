@@ -10,25 +10,21 @@ from bs4 import BeautifulSoup
 def text_cleaner(raw_html):
 	cleantext = BeautifulSoup(raw_html,"html.parser").text
 	cleantext = cleantext.lower()
+	cleantext = messageCleaner.modifica_correus(cleantext)
 	cleantext = messageCleaner.elimina_tildes(cleantext)
 	cleantext = messageCleaner.elimina_caracteres(cleantext)
 	cleantext = messageCleaner.elimina_letras_sueltas(cleantext)
-	cleantext = messageCleaner.elimina_webs(cleantext)
-	#idioma = messageCleaner.idioma_detect(cleantext)
 	cleantext = messageCleaner.stop_words(cleantext)
-	#cleantext = " ".join(cleantext.split())
 	return cleantext
 
 def query_cleaner(raw_html):
 	cleantext = BeautifulSoup(raw_html,"html.parser").text
 	cleantext = cleantext.lower()
+	cleantext = messageCleaner.modifica_correus(cleantext)
 	cleantext = messageCleaner.elimina_tildes(cleantext)
 	cleantext = messageCleaner.elimina_caracteres(cleantext)
 	cleantext = messageCleaner.elimina_letras_sueltas(cleantext)
-	cleantext = messageCleaner.elimina_webs(cleantext)
-	#idioma = messageCleaner.idioma_detect(cleantext)
 	cleantext = messageCleaner.stop_words(cleantext)
-	#cleantext = " ".join(cleantext.split())
 	return cleantext
 
 def take_data(collection):
@@ -47,8 +43,18 @@ def take_data(collection):
 		mongoController.insert_new_ticket(idTiquet, missatge, equipResolutor, producte, assumpte,
 			serveiTipus, subservei)
 
-#def take_ticket(ticket):
-	#pasem un ticket
+def take_ticket(jsonRequest):
+	idTiquet = jsonRequest['_id']
+	missatge = jsonRequest['descripcio']
+	missatge = query_cleaner(str(missatge))
+	equipResolutor = jsonRequest['equipResolutorNom']
+	producte = jsonRequest['producte']
+	assumpte = jsonRequest['assumpte']
+	serveiTipus = jsonRequest['serveiTipus']
+	subservei = jsonRequest['subservei']
+	mongoController.insert_new_ticket(idTiquet, missatge, equipResolutor, producte, assumpte,
+			serveiTipus, subservei)
+	return "Ha guardat be"
 
 def run():
 	collection = mongoController.connection_tickets()

@@ -1,41 +1,38 @@
 import gensim
 import numpy as np
 import simplejson as json
+import re, math
 
 from gensim import models
 from pymongo import MongoClient
 import DataCollection as datacollection
 import MongoController as mongoController
 import MessageCleaner as messageCleaner
+from collections import Counter
+
+WORD = re.compile(r'\w+')
+
+def vectorize(text):
+	words = WORD.findall(text)
+	return Counter(words)
 
 
-def vectorize(model, doc):
-	   """Identify the vector values for each word in the given document"""
-	   word_vecs = []
-	   for word in doc:
-		   try:
-			   vec = model[word]
-			   word_vecs.append(vec)
-		   except KeyError:
-			   # Ignore, if the word doesn't exist in the vocabulary
-			   pass
-	   # Assuming that document vector is the mean of all the word vectors
-	   # PS: There are other & better ways to do it.
-	   vector = np.mean(word_vecs, axis=0)
-	   print ("aixo son els vectors " + str(vector))
-	   return vector
+def _cosine_sim(vec1, vec2):
+	intersection = set(vec1.keys()) & set(vec2.keys())
+	numerator = sum([vec1[x] * vec2[x] for x in intersection])
 
+	vector1 = sum([vec1[x]**2 for x in vec1.keys()])
+	vector2 = sum([vec2[x]**2 for x in vec2.keys()])
+	denominator = math.sqrt(vector1) * math.sqrt(vector2)
 
-def _cosine_sim(vecA, vecB):
-	   """Find the cosine similarity distance between two vectors."""
-	   csim = np.dot(vecA, vecB) / (np.linalg.norm(vecA) * np.linalg.norm(vecB))
-	   if np.isnan(np.sum(csim)):
-		   return 0
-	   return csim
+	if not denominator:
+		return 0.0
+	else:
+		return float(numerator) / denominator
 
 #model, source_doc = query, target_docs = missatges anteriors
-def extract_context(model, source_doc, target_docs, threshold=0.7):
-		source_vec = vectorize(model, source_doc)
+def extract_context(source_doc, target_docs, threshold=0.3):
+		source_vec = vectorize(str(source_doc))
 		results = []
 		for doc in target_docs:
 			equip_resolutor = doc[1]
@@ -45,7 +42,7 @@ def extract_context(model, source_doc, target_docs, threshold=0.7):
 			subservei = doc[5]
 			_id = doc[6]
 			docAux = doc[0].split(" ")
-			target_vec = vectorize(model, docAux)
+			target_vec = vectorize(str(docAux))
 			sim_score = _cosine_sim(source_vec, target_vec)
 			if sim_score >= threshold:
 				results.append({
@@ -58,16 +55,18 @@ def extract_context(model, source_doc, target_docs, threshold=0.7):
 		for i in range (0, len(results)):
 			results[i]['Similitud'] = float(results[i]['Similitud'])
 		results.sort(key=lambda k: k['Similitud'], reverse=True)
-		del results[0]['Similitud']
+		#if len(results) > 0:
+		#	del results[0]['Similitud']
 		nova = json.loads(json.dumps(results))
 		return nova
-
 
 def run(query):
 	collection = mongoController.connection_messages()
 	cursor = collection.find()
+	print("Query" + str(query))
 	query = datacollection.query_cleaner(query)
 	query = query.split(" ")
+	print("Query" + str(query))
 
 	ticket_complete = []
 	for ticket in cursor:
@@ -86,14 +85,8 @@ def run(query):
 		sentenceAux = ticket_complete[i][0].split(" ") 
 		sentences += [sentenceAux]
 
-	model = models.Word2Vec(sentences, min_count=1)
-
-	result = extract_context(model, query, ticket_complete)
+	result = extract_context(query, ticket_complete)
 	if len(result) < 1:
-		print ("No hi ha cap similitud")
+		return ("No hi ha cap similitud")
 	else: 
-		print (str(result[0]))
-
-
-
-
+		return (str(result[0]))

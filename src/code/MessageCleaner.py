@@ -1,4 +1,5 @@
 import unicodedata
+import re
 
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
@@ -15,7 +16,6 @@ def idioma_detect(missatge):
 def elimina_caracteres(text):
 	caracteres = open("/Users/adriagarcia/Desktop/TFG/Codigo/src/data/caracteres.txt", "r")
 	#EN A PONGO LOS CARACTERES QUE NO QUIERO
-	print("Texto que entra: " + str(text))
 	a = []
 	for line in caracteres:
 		a.append(line.strip())
@@ -42,7 +42,6 @@ def elimina_letras_sueltas(text):
 
 	filtered_sentence = ""
 	word_tokens = word_tokenize(text)
-	print("Word Tokens: " + str(word_tokens))
 	for w in word_tokens:
 		if w not in a: 
 			filtered_sentence += w + " "
@@ -53,7 +52,6 @@ def elimina_tildes(s): #treure accents
    return ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
 
 def stop_words(text):
-	print("TEXT: " + str(text))
 	#stopwords  en tots els idiomes per evitar errors en detecció de llenguatge
 	stops = set(stopwords.words('spanish'))
 	stops.update(("Hola", "hola", "Gracias", "gracias", "Adios", "adios"))
@@ -74,13 +72,19 @@ def stop_words(text):
 	filtered_sentence = filtered_sentence[:-1]
 	return filtered_sentence
 
-def elimina_webs(text):
-	word_tokens = word_tokenize(text)
-	filtered_sentence = ""
-	for w in word_tokens:
-		if len(w) <= 9:
-				filtered_sentence += w + " "
-	filtered_sentence = filtered_sentence[:-1]
-	return filtered_sentence
+def modifica_correus(text):
+	match = re.findall(r'[\w\.-]+@[\w\.-]+', text)
+	text = text.split(" ")
+	missatge = ""
+	for word in text:
+		if word in match:
+			missatge += word + " " 
+		elif not word in match and len(word) > 15:
+			missatge += "webormail "
+		else:
+			missatge += word + " "
+	missatge = missatge[:-1]
+	return missatge
+
 
 
