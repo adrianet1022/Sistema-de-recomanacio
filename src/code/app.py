@@ -14,12 +14,13 @@ app = Flask(__name__)
 def create_task():
     if not request.json or not 'message' or not 'assumpte'in request.json:
         abort(400)
-    w2vResult = w2v.run(request.json['message'])
-    tutorialResult = difflib_version.run(request.json['message'])
-    w2vecNewResult = w2vec_v2.run(request.json['message'])
-    cosine_similarityResult = cosine_similarity.run(request.json['message'])
-    return jsonify("Assumpte: " + str(request.json['assumpte']), "w2v: " + str(w2vResult),  "w2vecNew: " + str(w2vecNewResult), 
-        "cosine_similarity: " + str(cosine_similarityResult), "tutorial: " + str(tutorialResult))
+    message = str(request.json['assumpte']) + " " + str(request.json['message'])
+    w2vResult = w2v.run(message)
+    tutorialResult = difflib_version.run(message)
+    w2vecNewResult = w2vec_v2.run(message)
+    cosine_similarityResult = cosine_similarity.run(message)
+    return jsonify("w2v: " + str(w2vResult),  "W2Vec_v2: " + str(w2vecNewResult), 
+        "cosine_similarity: " + str(cosine_similarityResult), "Difflib: " + str(tutorialResult))
 
 @app.route('/api/new_ticket/', methods=['POST'])
 def new_ticket():

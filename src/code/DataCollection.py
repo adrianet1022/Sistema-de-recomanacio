@@ -11,6 +11,7 @@ def text_cleaner(raw_html):
 	cleantext = BeautifulSoup(raw_html,"html.parser").text
 	cleantext = cleantext.lower()
 	cleantext = messageCleaner.modifica_correus(cleantext)
+	#cleantext = messageCleaner.elimina_paraules_llargues(cleantext)
 	cleantext = messageCleaner.elimina_tildes(cleantext)
 	cleantext = messageCleaner.elimina_caracteres(cleantext)
 	cleantext = messageCleaner.elimina_letras_sueltas(cleantext)
@@ -21,6 +22,7 @@ def query_cleaner(raw_html):
 	cleantext = BeautifulSoup(raw_html,"html.parser").text
 	cleantext = cleantext.lower()
 	cleantext = messageCleaner.modifica_correus(cleantext)
+	#cleantext = messageCleaner.elimina_paraules_llargues(cleantext)
 	cleantext = messageCleaner.elimina_tildes(cleantext)
 	cleantext = messageCleaner.elimina_caracteres(cleantext)
 	cleantext = messageCleaner.elimina_letras_sueltas(cleantext)
@@ -39,6 +41,7 @@ def take_data(collection):
 		subservei = ticket.get("subservei")
 
 		missatge = text_cleaner(missatge)
+		missatge = str(assumpte) + " " + str(missatge)
 
 		mongoController.insert_new_ticket(idTiquet, missatge, equipResolutor, producte, assumpte,
 			serveiTipus, subservei)

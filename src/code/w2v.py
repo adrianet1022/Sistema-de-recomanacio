@@ -22,7 +22,6 @@ def vectorize(model, doc):
 	   # Assuming that document vector is the mean of all the word vectors
 	   # PS: There are other & better ways to do it.
 	   vector = np.mean(word_vecs, axis=0)
-	   print ("aixo son els vectors " + str(vector))
 	   return vector
 
 
@@ -49,6 +48,7 @@ def extract_context(model, source_doc, target_docs, threshold=0.7):
 			sim_score = _cosine_sim(source_vec, target_vec)
 			if sim_score >= threshold:
 				results.append({
+					'Missatge' : str(doc[0]),
 					'Similitud': str(sim_score),
 					'Equip resolutor': str(equip_resolutor),
 					'Producte': str(producte),
@@ -58,7 +58,7 @@ def extract_context(model, source_doc, target_docs, threshold=0.7):
 		for i in range (0, len(results)):
 			results[i]['Similitud'] = float(results[i]['Similitud'])
 		results.sort(key=lambda k: k['Similitud'], reverse=True)
-		del results[0]['Similitud']
+		#del results[0]['Similitud']
 		nova = json.loads(json.dumps(results))
 		return nova
 
@@ -67,7 +67,6 @@ def run(query):
 	collection = mongoController.connection_messages()
 	cursor = collection.find()
 	query = datacollection.query_cleaner(query)
-	query = query.split(" ")
 
 	ticket_complete = []
 	for ticket in cursor:
@@ -90,9 +89,9 @@ def run(query):
 
 	result = extract_context(model, query, ticket_complete)
 	if len(result) < 1:
-		print ("No hi ha cap similitud")
+		return ("No hi ha cap similitud")
 	else: 
-		print (str(result[0]))
+		return (str(result[0]))
 
 
 

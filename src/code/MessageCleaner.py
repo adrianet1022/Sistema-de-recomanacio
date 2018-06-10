@@ -86,5 +86,16 @@ def modifica_correus(text):
 	missatge = missatge[:-1]
 	return missatge
 
+def elimina_paraules_llargues(text):
+	text = text.split(" ")
+	missatge = ""
+	for word in text:
+		if len(word) > 15:
+			missatge += ""
+		else:
+			missatge += word + " "
+	missatge = missatge[:-1]
+	return missatge
+
 
 

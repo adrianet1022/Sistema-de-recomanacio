@@ -46,6 +46,7 @@ def extract_context(source_doc, target_docs, threshold=0.3):
 			sim_score = _cosine_sim(source_vec, target_vec)
 			if sim_score >= threshold:
 				results.append({
+					'Missatge': str(doc[0]),
 					'Similitud': str(sim_score),
 					'Equip resolutor': str(equip_resolutor),
 					'Producte': str(producte),
@@ -63,10 +64,8 @@ def extract_context(source_doc, target_docs, threshold=0.3):
 def run(query):
 	collection = mongoController.connection_messages()
 	cursor = collection.find()
-	print("Query" + str(query))
 	query = datacollection.query_cleaner(query)
 	query = query.split(" ")
-	print("Query" + str(query))
 
 	ticket_complete = []
 	for ticket in cursor:

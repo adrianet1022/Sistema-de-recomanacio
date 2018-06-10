@@ -22,7 +22,7 @@ def run(query):
 	d = difflib.Differ()
 
 	for search in query:
-		matches = difflib.get_close_matches(search, possibilities = ticket_complete, n = 1, cutoff = 0.5)
+		matches = difflib.get_close_matches(search, possibilities = ticket_complete, n = 1, cutoff = 0.3)
 		if len(matches) == 0:
 			return("no hay matches")
 		else: 
@@ -35,8 +35,9 @@ def run(query):
 				assumpte = ticket.get("assumpte")
 				serveiTipus = ticket.get("serveiTipus")
 				subservei = ticket.get("subservei")
-			return ("Equip resolutor: " + str(equipResolutor), 
-				"Producte: " + str(producte), "Servei Tipus: " + str(serveiTipus),
-				"Subservei: " + str(subservei))
+			similitud = SM(None, s1,s2).ratio()
+			return ("Similitud: " + str(similitud) + ", Missatge: " + str(matches[0]) + ", Equip resolutor: " + str(equipResolutor), 
+				", Producte: " + str(producte), ", Servei Tipus: " + str(serveiTipus),
+				", Subservei: " + str(subservei))
 
 

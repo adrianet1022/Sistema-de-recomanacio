@@ -48,7 +48,7 @@ def extract_context(model, source_doc, target_docs, threshold=0.0):
 	for i in range (0, len(results)):
 		results[i]['Similitud'] = float(results[i]['Similitud'])
 	results.sort(key=lambda k: k['Similitud'], reverse=True)
-	del results[0]['Similitud']
+	#del results[0]['Similitud']
 	nova = json.loads(json.dumps(results))
 	return nova
 
