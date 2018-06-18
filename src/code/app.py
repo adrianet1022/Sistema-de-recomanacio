@@ -10,33 +10,104 @@ import DataCollection as dataCollection
 
 app = Flask(__name__)
 
-@app.route('/api/similitud/', methods=['POST'])
-def create_task():
+@app.route('/api/similitud/tots/', methods=['POST'])
+def create_task_tots():
     if not request.json or not 'message' or not 'assumpte'in request.json:
         abort(400)
     message = str(request.json['assumpte']) + " " + str(request.json['message'])
-    w2vResult = w2v.run(message)
-    tutorialResult = difflib_version.run(message)
-    w2vecNewResult = w2vec_v2.run(message)
-    cosine_similarityResult = cosine_similarity.run(message)
-    return jsonify("w2v: " + str(w2vResult),  "W2Vec_v2: " + str(w2vecNewResult), 
-        "cosine_similarity: " + str(cosine_similarityResult), "Difflib: " + str(tutorialResult))
+    resultW2v = w2v.run(message)
+    resultCosine = cosine_similarity.run(message)
+    resultDifflib = difflib_version.run(message)
+    resultW2vec = w2vec_v2.run(message)
+
+    return jsonify({
+            'Similitud': resultW2v['Similitud'],
+            'Missatge': resultW2v['Missatge'],
+            'EquipResolutor': resultW2v['Equip resolutor'],
+            'Producte': resultW2v['Producte'],
+            'Servei Tipus': resultW2v['Servei Tipus'],
+            'Subservei': resultW2v['Subservei']},
+        {
+            'Similitud': resultW2vec['Similitud'],
+            'Missatge': resultW2vec['Missatge'],
+            'EquipResolutor': resultW2vec['Equip resolutor'],
+            'Producte': resultW2vec['Producte'],
+            'Servei Tipus': resultW2vec['Servei Tipus'],
+            'Subservei': resultW2vec['Subservei']},
+        {
+            'Similitud': resultCosine['Similitud'],
+            'Missatge': resultCosine['Missatge'],
+            'EquipResolutor': resultCosine['Equip resolutor'],
+            'Producte': resultCosine['Producte'],
+            'Servei Tipus': resultCosine['Servei Tipus'],
+            'Subservei': resultCosine['Subservei']},
+        {
+            'Similitud': resultDifflib['Similitud'],
+            'Missatge': resultDifflib['Missatge'],
+            'EquipResolutor': resultDifflib['Equip resolutor'],
+            'Producte': resultDifflib['Producte'],
+            'Servei Tipus': resultDifflib['Servei Tipus'],
+            'Subservei': resultDifflib['Subservei']}
+    )
+
+
+@app.route('/api/similitud/w2v/', methods=['POST'])
+def create_task_w2v():
+    if not request.json or not 'message' or not 'assumpte'in request.json:
+        abort(400)
+    message = str(request.json['assumpte']) + " " + str(request.json['message'])
+    result = w2v.run(message)
+    return jsonify({
+        'EquipResolutor': result['Equip resolutor'],
+        'Producte': result['Producte'],
+        'Servei Tipus': result['Servei Tipus'],
+        'Subservei': result['Subservei']}
+    )
+
+@app.route('/api/similitud/w2vec_new/', methods=['POST'])
+def create_task_w2vnew():
+    if not request.json or not 'message' or not 'assumpte'in request.json:
+        abort(400)
+    message = str(request.json['assumpte']) + " " + str(request.json['message'])
+    result = w2vec_v2.run(message)
+    return jsonify({
+        'EquipResolutor': result['Equip resolutor'],
+        'Producte': result['Producte'],
+        'Servei Tipus': result['Servei Tipus'],
+        'Subservei': result['Subservei']}
+    )
+
+@app.route('/api/similitud/cosine_similarity/', methods=['POST'])
+def create_task_cosine():
+    if not request.json or not 'message' or not 'assumpte'in request.json:
+        abort(400)
+    message = str(request.json['assumpte']) + " " + str(request.json['message'])
+    result = cosine_similarity.run(message)
+    return jsonify({
+        'EquipResolutor': result['Equip resolutor'],
+        'Producte': result['Producte'],
+        'Servei Tipus': result['Servei Tipus'],
+        'Subservei': result['Subservei']}
+    )
+
+@app.route('/api/similitud/difflib/', methods=['POST'])
+def create_task_difflib():
+    if not request.json or not 'message' or not 'assumpte'in request.json:
+        abort(400)
+    message = str(request.json['assumpte']) + " " + str(request.json['message'])
+    result = difflib_version.run(message)
+    return jsonify({
+        'EquipResolutor': result['Equip resolutor'],
+        'Producte': result['Producte'],
+        'Servei Tipus': result['Servei Tipus'],
+        'Subservei': result['Subservei']}
+    )
 
 @app.route('/api/new_ticket/', methods=['POST'])
 def new_ticket():
     if not request.json or not '_id' or not 'descripcio' or not 'equipResolutorNom' or not 'producte' or not 'assumpte' or not 'serveiTipus' or not 'subservei' in request.json:
         abort(405)
     return jsonify(dataCollection.take_ticket(request.json))
-    #return jsonify(str(request.json)) 
-
-#Metode POST per crear un nou post de message
-"""
-{
-	"book": {
-		"subtitle": "Read a second book"
-	}
-}
-"""
 
 @app.route('/api/prova/', methods=['GET'])
 def prova():

@@ -23,12 +23,27 @@ def run(query):
 
 	for search in query:
 		matches = difflib.get_close_matches(search, possibilities = ticket_complete, n = 1, cutoff = 0.3)
-		if len(matches) == 0:
-			return("no hay matches")
+		result = []
+		if len(matches) < 1:
+			result = []
+			result.append({
+				'Similitud': "",
+            	'Missatge': "",
+				'Equip resolutor': "No hay matches",
+				'Producte': "",
+				'Servei Tipus': "",
+				'Subservei':""}
+			)
+			nova = json.loads(json.dumps(results))
+			return (nova[0]) 
 		else: 
 			s1 = str(matches[0])
 			s2 = str(query[0])
 			cursor = collection.find({"missatge": str(matches[0])})
+			equipResolutor =""
+			producte=""
+			serveiTipus=""
+			subservei=""
 			for ticket in cursor:
 				equipResolutor = ticket.get("equipResolutor")
 				producte = ticket.get("producte")
@@ -36,8 +51,14 @@ def run(query):
 				serveiTipus = ticket.get("serveiTipus")
 				subservei = ticket.get("subservei")
 			similitud = SM(None, s1,s2).ratio()
-			return ("Similitud: " + str(similitud) + ", Missatge: " + str(matches[0]) + ", Equip resolutor: " + str(equipResolutor), 
-				", Producte: " + str(producte), ", Servei Tipus: " + str(serveiTipus),
-				", Subservei: " + str(subservei))
+			result.append({
+				'Similitud': similitud,
+            	'Missatge': str(matches[0]),
+				'Equip resolutor': equipResolutor,
+				'Producte': producte,
+				'Servei Tipus': serveiTipus,
+				'Subservei':subservei}
+			)
+			return result[0]
 
 

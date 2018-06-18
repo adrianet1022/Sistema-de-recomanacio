@@ -89,10 +89,17 @@ def run(query):
 
 	result = extract_context(model, query, ticket_complete)
 	if len(result) < 1:
-		return ("No hi ha cap similitud")
+		result = []
+		result.append({
+			'Equip resolutor': "No s'ha trobat cap similitud",
+			'Producte': "",
+			'Servei Tipus': "",
+			'Subservei':""}
+			)
+		nova = json.loads(json.dumps(results))
+		return (nova[0]) 
 	else: 
-		return (str(result[0]))
-
+		return (result[0])
 
 
 
